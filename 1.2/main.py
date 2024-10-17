@@ -8,7 +8,7 @@ def main():
     for i in range(0, 10):
         y1 = float(3) + x if x == a else a - x
         y2 = abs(a) if a < x else abs(a) - x
-        y = y1 + y2
+        y = y1 * y2
         print()
         print('x={:5.3f}'.format(x))
         print('a={:5.3f}'.format(a))

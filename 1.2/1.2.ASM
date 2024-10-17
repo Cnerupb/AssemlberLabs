@@ -68,7 +68,7 @@ start:
                       fld qword [ds:a]
                       fld qword [ds:x]
                       fsubp
-                      fstp [ds:y1]
+                      fstp [ds:y1] ; store y1
                 ;---------------------
                       jmp if_1_out
                 else_1: ; x == a
@@ -77,7 +77,7 @@ start:
                       mov [ds:temp], 3
                       fild dword [ds:temp]
                       fadd qword [ds:x]
-                      fstp [ds:y1]
+                      fstp [ds:y1] ; store y1
                       if_1_out:
 
                 finit
@@ -88,24 +88,25 @@ start:
                 if_2: ; a < x
                 ;--- y2 = a - 1 ---
                      fld qword [ds:a]
-                     fabs
-                     fstp [ds:y2]
+                     fabs ; st0 = |st0|
+                     fstp [ds:y2] ; store y2
                      ;--------------------
                      jmp if_2_out
                 else_2: ;a >= x
                 ;--- y2 = |a| - x ---
                      fld qword [ds:a]
-                     fabs
+                     fabs ; st0 = |st0|
                      fld qword [ds:x]
-                     fsubp
-                     fstp [ds:y2]
+                     fsubp  ; st0 - st1 and pop stack
+                     fstp [ds:y2] ; store y2
                      ;----------------
                      if_2_out:
 
 
                 ;--- y = y1 + y2 -----
                 fld qword [ds:y1]
-                fadd qword [ds:y2]
+                fld qword [ds:y2]
+                fmulp
                 fstp [ds:y]
                 ;---------------------
 
