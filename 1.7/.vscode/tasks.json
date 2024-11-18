@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "arm-debugger.flash",
+			"serialNumber": "<serial number of your device>",
+			"program": "${command:arm-debugger.getApplicationFile}",
+			"cmsisPack": "<path or URL of CMSIS Pack for your device>",
+			"problemMatcher": [],
+			"label": "arm-debugger.flash: Flash Device"
+		}
+	]
+}
