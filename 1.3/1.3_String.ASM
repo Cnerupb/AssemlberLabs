@@ -70,6 +70,7 @@ count_words:
     ; Цикл поиска слов
     find_word:
       mov   al,  32             ; Устанавливаем AL равным пробелу (код символа 32)
+      ; repz scasb
       repnz scasb               ; Ищем следующий пробел или конец строки
       mov   eax, ebx            ; Рассчитываем длину текущего слова
       sub   eax, ecx
@@ -104,7 +105,7 @@ print_result:
     ; Считаем среднюю длину слова
     finit
     fild dword [ds:word_count]
-    fild dword [ds:len_string_woes]
+    fild dword [ds:len_words]
     fdiv st0, st1
     fstp qword [ds:average_word_len]
 

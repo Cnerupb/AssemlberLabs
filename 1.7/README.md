@@ -3,5 +3,5 @@
 ## ОС
 Windows
 ## Assembler
-ARM Architecture
-Сделано с помощью ARMSIM
+ARM Architecture x32
+Сделано с помощью ARMSIM с использованием ANGEL_SWI инструкций

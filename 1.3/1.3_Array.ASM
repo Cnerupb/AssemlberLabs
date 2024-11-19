@@ -7,17 +7,18 @@ include 'win32ax.inc'
 ;=======================================================
 section '.data' data readable writeable
 ;=======================================================
-        matrix db 5, 0, 1, 5 ; Матрица, заданная в коде.
-               db 3, 4, 2, 4 ; Размер матрицы 4x4 (4 строки, 4 столбца).
-               db 5, 8, 6, 4
-               db 1, 2, 1, 0
+        matrix db 0, 0, 1, 0, 97 ; Матрица, заданная в коде.
+               db 3, 4, 2, 4, 0 ; Размер матрицы 4x4 (4 строки, 4 столбца).
+               db 5, 8, 6, 4, 5
+               db -1, -2, -1, 0, -9
+               db 0, 0, 0, 0, 0
 
-        b_vec db 1, 2, 3, 4, 5, 6, 7, 8 ; Массив(вектор) b
+        b_vec db 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ; Массив(вектор) b
 
-        matrix_rows equ 4      ; Количество строк матрицы.
-        matrix_cols equ 4      ; Количество столбцов матрицы.
-        m dd 4                 ; Переменная для итераций по строкам (m = 3).
-        n dd 4                 ; Переменная для итераций по столбцам (n = 3).
+        matrix_rows equ 5      ; Количество строк матрицы.
+        matrix_cols equ 5      ; Количество столбцов матрицы.
+        m dd 5                 ; Переменная для итераций по строкам (m = 4).
+        n dd 5                 ; Переменная для итераций по столбцам (n = 4).
         max_sum dd 0
         min_sum dd 9999999
         max_i dd 0             ; index of row with max sum
@@ -61,7 +62,7 @@ outer_loop:
 end_outer_loop:
          mov edi, 0
          mov esi, 0
-         jmp fill_vector
+         jmp fill_max_row
 
 inner_loop:
         ; if j >= n
@@ -75,6 +76,7 @@ inner_loop:
         add eax, edi
         movzx ebx, byte [matrix + eax] ; записываем в ebx элемент matrix[i][j]
         add edx, ebx ; Накапливаем сумму элементов текущей строки в edx
+
 
         inc edi ; j ++
         jmp inner_loop
@@ -96,44 +98,79 @@ update_sum:
 
 update_max_sum:
         mov [max_sum], edx
+        dec esi
         mov [max_i], esi
+        inc esi
         jmp update_sum
 
 update_min_sum:
         mov [min_sum], edx
+        dec esi
         mov [min_i], esi
+        inc esi
         jmp update_sum
 
-fill_vector:
+fill_max_row:
         mov eax, 0
         mov ebx, 0
         mov ecx, 0
-        add ecx, 0
-        mov ebp, [m]
-        ; add ebp, [n]
-        mov esi, 0
-        mov esi, 0
-        mov edi, 0
-        mov edi, 0
 
-        jmp vector_loop
+        mov ebp, [m] ; Подсчёт длины массива b
+        add ebp, [n]
+        mov esi, matrix ; указатель на матрицу
+        mov ebx, [max_i] ; переходим на строчку с макс суммой
+        imul ebx, [n]
+        add esi, ebx
+        mov edi, b_vec ; указатель на массив b
 
-vector_loop:
-        cmp esi, ebp
-        jge end_vector_loop
+        jmp fill_max_row_loop
 
-        mov ebx, [max_i]
-        imul ebx, [m]
-        add ebx, esi
-        ; TODO: разобраться, как заполнить массив b из элементов матрицы
-        movzx eax, byte [matrix + ebx]
-        invoke printf, fmtInt, eax
+fill_max_row_loop:
+        cmp ecx, ebp
+        jge end_fill_max_row_loop
 
+        mov al, [esi]
+        mov [edi], al
 
         inc esi
-        jmp vector_loop
+        add edi, 2
+        add ecx, 2
+        jmp fill_max_row_loop
 
-end_vector_loop:
+end_fill_max_row_loop:
+        jmp fill_min_row
+
+fill_min_row:
+        mov eax, 0
+        mov ebx, 0
+        mov ecx, 0
+
+        mov ebp, [m] ; Подсчёт длины массива b
+        add ebp, [n]
+
+        mov esi, matrix ; указатель на матрицу
+        mov ebx, [min_i] ; переходим на строчку с макс суммой
+        imul ebx, [n]
+        add esi, ebx
+
+        mov edi, b_vec ; указатель на массив b
+        inc edi
+
+        jmp fill_min_row_loop
+
+fill_min_row_loop:
+        cmp ecx, ebp
+        jge end_fill_min_row_loop
+
+        mov al, [esi]
+        mov [edi], al
+
+        inc esi
+        add edi, 2
+        add ecx, 2
+        jmp fill_min_row_loop
+
+end_fill_min_row_loop:
         jmp print_result
 
 print_result:
