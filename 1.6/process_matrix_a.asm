@@ -5,7 +5,7 @@
 	prompt_buff:	.string "buffer: "
 	prompt_nums:	.string "numbers: "
 	prompt_mb:	.string "Matrix B: "
-	buffer: 	.space 100			# Буфер для чтения данных
+	buffer: 	.space 48			# Буфер для чтения данных
 	numbers:	.word 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1	# 12 чисел по 4 байта (48 байт всего)
 	matrixB:	.word 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1	# 12 чисел по 4 байта
 	
@@ -131,8 +131,6 @@ end_print_numbers_loop:
 	li t2, 0		# под загружаемый элемент
 	li t3, 0
 	li t4, 12
-	
-	j loop_1
 
 loop_1:
 	# копируем матрицу numbers в матрицу B
@@ -157,8 +155,6 @@ end_loop_1:
 	li t1, 0			# под загружаемый элемент
 	li t2, 0			# счетчик длины
 	li t3, 12			# длина матрицы
-	
-	j loop_2
 
 loop_2:
 	# вывод матрицы B
@@ -180,59 +176,86 @@ loop_2:
 	j loop_2
 
 end_loop_2:
+	j end_program
+	la t0, matrixB
+	li t1, 12
+	
+
+print_mb_loop_1:
+	beqz t1, end_print_mb_loop_1
+	
+	# Печать символа
+	li a7, 1
+	lw t2, 0(t0)
+	mv a0, t2
+	ecall
+	# Пробел
+	li a7, 11
+	li a0, ' '
+	ecall
+	
+	addi t0, t0, 4
+	li a5, 1
+	sub t1, t1, a5
+	j print_mb_loop_1
+	
+end_print_mb_loop_1:
 	la t0, numbers
-	li t1, 0			# Под загружаемый элемент
-	li t2, 0			# Индекс строки
-	li s2, 3			# Кол-во строк
-	
-	li t3, 0			# Индекс столбца
-	li s3, 4			# Кол-во столбцов
-	
-	li t6, 0			# Сумма строки
-	j row_loop_3
+	la t1, matrixB
+	li t2, 0			# индекс строки
+	li t3, 0			# индекс столбца
+	# в s0 индекс макс строки
+	li s2, 3			# кол-во строк
+	li s3, 4			# кол-во столбцов
 
 row_loop_3:
-	# Перезаполнение массива B согласно заданию
 	beq t2, s2, end_loop_3
 	
 	li t3, 0
-	li t6, 0
 	j col_loop_3
 
 col_loop_3:
 	beq t3, s3, next_row_3
 	
-	lw t1, 0(t0)
-	add t6, t6, t1
+	# высчитываем индекс элемента K-й строки
+	li t4, 4
+	mv t5, s0			# t5 = max_row_index
+	mul t5, t5, t4			# 4*max_row_index
+	add t5, t5, t3			# 4*max_row_index + col_index
+	mul t5, t5, t4			# (4*i + j)*4
+	
+	la t4, numbers
+	add t4, t4, t5
+	
+	lw t4, 0(t4)			# загружаем в t4 элемент K-й строки
+	lw t5, 0(t0)			# в t5 загружаем текущий элемент в матрице А
+	
+	div t5, t5, t4			# делим элемент из матрицы на элемент из матрицы из K-й строки
+	
+	sw t5, 0(t1)			# записываем элемент в матрицу B
 	
 	addi t0, t0, 4
-	
+	addi t1, t1, 4
 	addi t3, t3, 1
 	j col_loop_3
 	
 
 next_row_3:
-	bgt t6, s0, update_max_row
-	addi t2, t2, 1
-	j row_loop_3
-
-update_max_row:
-	mv s0, t2
-	li a5, 1
-	sub s0, s0, a5
-	
+	addi t0, t0, 4			# Переходим к следующему элементу матрицы A
+	addi t1, t1, 4			# Переходим к следующему элементу матрицы B
 	addi t2, t2, 1
 	j row_loop_3
 
 end_loop_3:
+	# Новая строка
+	li a7, 4
+	la a0, newline
+	ecall
+
 	la t0, matrixB
-	li t1, 0
-	
+	li t1, 0			# под загружаемый элемент
 	li t2, 0			# индекс строки
-	li s2, 3			# кол-во строк
-	
 	li t3, 0 			# индекс столбца
-	li s3, 4			# кол-во столбцов
 
 row_loop_4:
 	beq t2, s2, end_loop_4
@@ -243,58 +266,10 @@ row_loop_4:
 col_loop_4:
 	beq t3, s3, next_row_4
 	
-	# высчитываем индекс элемента K-й строки
-	li t4, 4
-	mv t5, s0			# t5 = max_row_index
-	mul t5, t5, t4			# 4*max_row_index
-	add t5, t5, t3			# 4*max_row_index + col_index
-	mul t5, t5, t4			# (4*i + j)*4
-	
-	la t1, numbers
-	add t1, t1, t5
-	
-	lw t4, 0(t0)
-	lw t5, 0(t1)
-	div t6, t4, t5
-	sw t6, 0(t0)
-	
-	addi t0, t0, 4
-	
-	addi t3, t3, 1
-	j col_loop_4
-
-next_row_4:
-	addi t2, t2, 1
-	j row_loop_4
-
-end_loop_4:
-	# Новая строка
-	li a7, 4
-	la a0, newline
-	ecall
-
-	la t0, matrixB
-	li t1, 0			# под загружаемый элемент
-	
-	li t2, 0
-	li s2, 3
-	
-	li t3, 0
-	li s3, 4
-
-row_loop_5:
-	beq t2, s2, end_loop_5
-	
-	li t3, 0
-	j col_loop_5
-
-col_loop_5:
-	beq t3, s3, next_row_5
-	
 	# Печать элемента
+	lw t6, 0(t0)
 	li a7, 1
-	lw t1, 0(t0)
-	mv a0, t1
+	mv a0, t6
 	ecall
 	# Пробел
 	li a7, 11
@@ -302,20 +277,20 @@ col_loop_5:
 	ecall
 	
 	addi t0, t0, 4
-	
 	addi t3, t3, 1
-	j col_loop_5
+	j col_loop_4
 
-next_row_5:
-	# Новая строка
+next_row_4:
+	# новая строка
 	li a7, 4
 	la a0, newline
 	ecall
 
+	addi t0, t0, 4
 	addi t2, t2, 1
-	j row_loop_5
-	
-end_loop_5:
+	j row_loop_4
+
+end_loop_4:
 end_program:
 	li a7, 93			# Системный вызов для выхода (sys_exit)
 	li a0, 0			# Код возврата
