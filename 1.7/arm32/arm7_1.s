@@ -3,7 +3,7 @@ output_block:
     .align 4                    @ Выровняем блок на границу 4 байт
     .word 0, 0, 0               @ Блок для передачи дескриптора, буфера и длины
 
-char_array:   .asciz "   Hello World, This is a SAMPLE Sentence.  Contains  a lot    of spaces"         @   Hello World, This is a SAMPLE Sentence.  Contains  a lot    of spaces   
+char_array:   .asciz "   Hello World, This is ad SAMPLE Sentence! ##%^() Contains  ad lot    of spaces"         @   Hello World, This is a SAMPLE Sentence.  Contains  a lot    of spaces   
 char_output:  .skip 80
 blank_line:   .asciz "\n"
 word_not_found: .asciz "Word not found"

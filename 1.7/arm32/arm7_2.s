@@ -3,7 +3,7 @@ output_block:
     .align 4                    @ Выровняем блок на границу 4 байт
     .word 0, 0, 0               @ Блок для передачи дескриптора, буфера и длины
 
-char_array:   .asciz "  Hello World, This is a SAMPLE Sentence.  "
+char_array:   .asciz "  Hello World, This is aad SAMPLE Sentence. ()!#$$#%#%&^  "
 char_output:  .skip 80
 blank_line:   .asciz "\n"
 
