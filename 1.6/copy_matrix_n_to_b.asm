@@ -250,7 +250,7 @@ col_loop_4:
 	add t5, t5, t3			# 4*max_row_index + col_index
 	mul t5, t5, t4			# (4*i + j)*4
 	
-	la t1, numbers
+	la t1, matrixB
 	add t1, t1, t5
 	
 	lw t4, 0(t0)
